@@ -8,7 +8,7 @@ if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
 }
 
-let builds = require('./config').getAllBuilds()
+let builds = require('./config').getAllBuilds() // 多文件打包的 rollup 编译配置文件
 
 // filter builds via command line arg
 if (process.argv[2]) {
@@ -23,7 +23,7 @@ if (process.argv[2]) {
   })
 }
 
-build(builds)
+build(builds) // 把编译配置文件传进 build 函数进行编译打包。
 
 function build (builds) {
   let built = 0
@@ -46,7 +46,7 @@ function buildEntry (config) {
   const isProd = /(min|prod)\.js$/.test(file)
   return rollup.rollup(config)
     .then(bundle => bundle.generate(output))
-    .then(({ output: [{ code }] }) => {
+    .then(({ output: [{ code }] }) => { // 对 rollup 编译打包出来的 code 再做些处理
       if (isProd) {
         const minified = (banner ? banner + '\n' : '') + terser.minify(code, {
           toplevel: true,
@@ -71,7 +71,7 @@ function write (dest, code, zip) {
       resolve()
     }
 
-    fs.writeFile(dest, code, err => {
+    fs.writeFile(dest, code, err => { // 把处理好的打包后的文件写入 dist 目录下
       if (err) return reject(err)
       if (zip) {
         zlib.gzip(code, (err, zipped) => {
