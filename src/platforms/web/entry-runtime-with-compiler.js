@@ -1,10 +1,14 @@
 /* @flow */
 
+// runtime + compile 版本引入的 vue 就是这个文件.
+// 当然这个文件也导出的 vue 。
+// 这里就是在 vue 的原型上挂点东西。
+
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { mark, measure } from 'core/util/perf'
 
-import Vue from './runtime/index'
+import Vue from './runtime/index' // 深扒 vue
 import { query } from './util/index'
 import { compileToFunctions } from './compiler/index'
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'

@@ -1,4 +1,5 @@
 /* @flow */
+// 全局 API => Vue 函数的静态属性
 
 import {
   no,

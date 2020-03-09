@@ -1,4 +1,5 @@
 /* @flow */
+// 导出给 Vue 初始化全局 API 的方法 => 给 Vue 构造函数挂载上静态属性(util, set, delete, nextTick 等)
 
 import config from '../config'
 import { initUse } from './use'
@@ -21,15 +22,15 @@ import {
 export function initGlobalAPI (Vue: GlobalAPI) {
   // config
   const configDef = {}
-  configDef.get = () => config
+  configDef.get = () => config // getter 
   if (process.env.NODE_ENV !== 'production') {
-    configDef.set = () => {
+    configDef.set = () => { // setter
       warn(
         'Do not replace the Vue.config object, set individual fields instead.'
       )
     }
   }
-  Object.defineProperty(Vue, 'config', configDef)
+  Object.defineProperty(Vue, 'config', configDef) // 挂上全局 API,也就给 Vue 函数添加静态属性 config。
 
   // exposed util methods.
   // NOTE: these are not considered part of the public API - avoid relying on

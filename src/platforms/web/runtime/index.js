@@ -1,6 +1,9 @@
 /* @flow */
+// 这里是对 vue 的原型和静态属性 config 做一些操作
+// 当然最终也是到处 Vue
+// 可以继续深扒 vue
 
-import Vue from 'core/index'
+import Vue from 'core/index' // 可以继续深扒 vue。
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
