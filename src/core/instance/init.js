@@ -14,7 +14,7 @@ let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
-    const vm: Component = this
+    const vm: Component = this // this 指向实例的，把 this 赋给 vm， vm 就代表 Vue 实例。
     // a uid
     vm._uid = uid++
 
@@ -35,7 +35,7 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
-      vm.$options = mergeOptions(
+      vm.$options = mergeOptions( // merge 传入的 options，挂载在 vm.$options 上
         resolveConstructorOptions(vm.constructor),
         options || {},
         vm
@@ -54,7 +54,7 @@ export function initMixin (Vue: Class<Component>) {
     initRender(vm)
     callHook(vm, 'beforeCreate')
     initInjections(vm) // resolve injections before data/props
-    initState(vm)
+    initState(vm) // 处理 options 的 props, methods, data, computed, watch
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
 

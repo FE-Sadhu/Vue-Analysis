@@ -29,13 +29,14 @@ import {
 } from '../util/index'
 
 const sharedPropertyDefinition = {
-  enumerable: true,
-  configurable: true,
+  enumerable: true, // 可枚举
+  configurable: true, // 可配置
   get: noop,
   set: noop
 }
 
-export function proxy (target: Object, sourceKey: string, key: string) {
+// Object.defineProperty 拦截器，拦截 target 的 key 的 getter, setter
+export function proxy (target: Object, sourceKey: string, key: string) { 
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
   }
@@ -48,9 +49,9 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
-  if (opts.props) initProps(vm, opts.props)
-  if (opts.methods) initMethods(vm, opts.methods)
-  if (opts.data) {
+  if (opts.props) initProps(vm, opts.props) // 初始化 Props 
+  if (opts.methods) initMethods(vm, opts.methods) // 初始化 Methods
+  if (opts.data) { // 处理 data
     initData(vm)
   } else {
     observe(vm._data = {}, true /* asRootData */)
@@ -111,12 +112,17 @@ function initProps (vm: Component, propsOptions: Object) {
 
 function initData (vm: Component) {
   let data = vm.$options.data
-  data = vm._data = typeof data === 'function'
-    ? getData(data, vm)
+  // 假设 data() {return {message: 123}}
+  // 实例 this(vm) 上是访问不到 data 的 key 的，当我们在 vue 项目代码中写 this.message 的时候，
+  // 其实是被 Object.defineProperty(vm, message, {xxx}) 代理了，
+  // 实际的 getter 和 setter 都是针对 this._data.message 的
+  data = vm._data = typeof data === 'function' // 一个组件的 data 选项必须是一个函数，因此每次调用组件产生的实例可以维护一份被返回对象的独立的拷贝，从而组件多复用时 data 里的值互不影响。
+    ? getData(data, vm) // 也是返回 data 定义对象
     : data || {}
+    
   if (!isPlainObject(data)) {
     data = {}
-    process.env.NODE_ENV !== 'production' && warn(
+    process.env.NODE_ENV !== 'production' && warn( // 开发环境爆一个警告，data function 必须返回个对象。
       'data functions should return an object:\n' +
       'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
       vm
@@ -130,20 +136,20 @@ function initData (vm: Component) {
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
-      if (methods && hasOwn(methods, key)) {
+      if (methods && hasOwn(methods, key)) { // data 中定义过的 key 不能在 methods 中重复定义，不能重名。
         warn(
           `Method "${key}" has already been defined as a data property.`,
           vm
         )
       }
     }
-    if (props && hasOwn(props, key)) {
+    if (props && hasOwn(props, key)) { // data 中定义过的 key 不能与 props 重名。
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
         `Use prop default value instead.`,
         vm
       )
-    } else if (!isReserved(key)) {
+    } else if (!isReserved(key)) { // 如果 key 的开头不是 $ 或 _ 的话（不是私有属性的话），执行 proxy(vm, `_data`, key) 拦截 key。
       proxy(vm, `_data`, key)
     }
   }
@@ -155,7 +161,10 @@ export function getData (data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
   pushTarget()
   try {
-    return data.call(vm, vm)
+    // 原来 data () { return { xx }} 这种调用方式是可以接受 vue 实例参数的，并且 this 绑定 实例。
+    // 为什么有个 call 把 this 指向 vm 呢？ 因为 data 里面是访问 this 的，比如用 this 取 props 的值。
+    // 那么这个 this.propKey 就等同于 vm.propKey
+    return data.call(vm, vm) 
   } catch (e) {
     handleError(e, vm, `data()`)
     return {}
