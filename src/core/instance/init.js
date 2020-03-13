@@ -42,10 +42,11 @@ export function initMixin (Vue: Class<Component>) { // 初始化生命周期、�
       )
     }
     /* istanbul ignore else */
-    if (process.env.NODE_ENV !== 'production') {
-      initProxy(vm)
-    } else {
-      vm._renderProxy = vm
+    // 这里设置 vm._renderProxy 仅作为后面调用 render 函数的上下文。 render.call(vm._renderProxy, $createElement)
+    if (process.env.NODE_ENV !== 'production') { 
+      initProxy(vm) // 开发环境下，看浏览器支持 Proxy API 不，支持的话 vm._renderProxy = Proxy 对象 否则 vm._renderProxy = vm .
+    } else { // 生产环境下
+      vm._renderProxy = vm 
     }
     // expose real self
     vm._self = vm

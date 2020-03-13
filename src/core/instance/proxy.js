@@ -37,7 +37,7 @@ if (process.env.NODE_ENV !== 'production') {
   const hasProxy =
     typeof Proxy !== 'undefined' && isNative(Proxy)
 
-  if (hasProxy) {
+  if (hasProxy) { // 浏览器支持 Proxy API 的话
     const isBuiltInModifier = makeMap('stop,prevent,self,ctrl,shift,alt,meta,exact')
     config.keyCodes = new Proxy(config.keyCodes, {
       set (target, key, value) {
@@ -67,21 +67,21 @@ if (process.env.NODE_ENV !== 'production') {
 
   const getHandler = {
     get (target, key) {
-      if (typeof key === 'string' && !(key in target)) {
-        if (key in target.$data) warnReservedPrefix(target, key)
-        else warnNonPresent(target, key)
+      if (typeof key === 'string' && !(key in target)) { // in 操作符可以读 getter !!!!!!!!!!!!!!!!!!!! 
+        if (key in target.$data) warnReservedPrefix(target, key) // 报警告⚠️：key 多半是 _ || $ 开头的，没被 vue 实例代理。(也就是没被加上 getter setter)
+        else warnNonPresent(target, key) // 报警告⚠️：key 压根没在 data 中定义。
       }
       return target[key]
     }
   }
 
   initProxy = function initProxy (vm) {
-    if (hasProxy) {
+    if (hasProxy) { // 支持 Proxy api 不。
       // determine which proxy handler to use
       const options = vm.$options
       const handlers = options.render && options.render._withStripped
-        ? getHandler
-        : hasHandler
+        ? getHandler // runtime-only 版本就是 getHandler ，因为需要手写 render
+        : hasHandler // 带编译器的版本就是 hasHandler，因为此时还没编译 template 没有 render 函数
       vm._renderProxy = new Proxy(vm, handlers)
     } else {
       vm._renderProxy = vm

@@ -28,9 +28,13 @@ export function initRender (vm: Component) {
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
   // internal version is used by render functions compiled from templates
-  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+  
+  // _c 方法被编译而来的 render 函数（作为第一个参数）使用。 是当 render 函数通过 template 编译而来时，用 _c 方法当做 render 函数第一个参数。
+  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false) // 唯一区别，最后一个参数。
   // normalization is always applied for the public version, used in
   // user-written render functions.
+
+  // $createElement 方法被手写的 render 函数（作为第一个参数）使用。 是当用户手写 render 函数时，传进去的第一个参数就是这个函数。
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 
   // $attrs & $listeners are exposed for easier HOC creation.
@@ -68,6 +72,8 @@ export function renderMixin (Vue: Class<Component>) {
 
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
+    
+    // 拿到 render 函数。
     const { render, _parentVnode } = vm.$options
 
     if (_parentVnode) {
@@ -88,6 +94,9 @@ export function renderMixin (Vue: Class<Component>) {
       // separately from one another. Nested component's render fns are called
       // when parent component is patched.
       currentRenderingInstance = vm
+
+      // 执行 render 函数生成 vnode，其第一个参数是一个函数 (a, b ,c ,d) => createElement(vm, a, b, c, d, true/false);
+      // 实际上，vnode 是调用 createELement  生成的。
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
       handleError(e, vm, `render`)
