@@ -18,15 +18,16 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
-const mount = Vue.prototype.$mount
-Vue.prototype.$mount = function (
+const mount = Vue.prototype.$mount // 缓存 mount 方法
+Vue.prototype.$mount = function ( // 覆盖 mount 方法，+ compiler 版本的就需要覆盖。
   el?: string | Element,
-  hydrating?: boolean
+  hydrating?: boolean // 这个参数是服务端渲染相关用的，暂且不理。
 ): Component {
-  el = el && query(el)
+  el = el && query(el) // 返回 el 对应的 DOM 元素。
 
   /* istanbul ignore if */
-  if (el === document.body || el === document.documentElement) {
+  // 不要把 Vue 挂载在 html / body 元素上
+  if (el === document.body || el === document.documentElement) { 
     process.env.NODE_ENV !== 'production' && warn(
       `Do not mount Vue to <html> or <body> - mount to normal elements instead.`
     )
@@ -39,8 +40,8 @@ Vue.prototype.$mount = function (
     let template = options.template
     if (template) {
       if (typeof template === 'string') {
-        if (template.charAt(0) === '#') {
-          template = idToTemplate(template)
+        if (template.charAt(0) === '#') { // id && id to template
+          template = idToTemplate(template) // id to template
           /* istanbul ignore if */
           if (process.env.NODE_ENV !== 'production' && !template) {
             warn(
@@ -49,7 +50,7 @@ Vue.prototype.$mount = function (
             )
           }
         }
-      } else if (template.nodeType) {
+      } else if (template.nodeType) { // DOM 节点 to template
         template = template.innerHTML
       } else {
         if (process.env.NODE_ENV !== 'production') {
@@ -58,14 +59,16 @@ Vue.prototype.$mount = function (
         return this
       }
     } else if (el) {
-      template = getOuterHTML(el)
+      template = getOuterHTML(el) // 如果没写 template，就把 el 的 outerHTML 作为 template
     }
     if (template) {
       /* istanbul ignore if */
+      // 服务端渲染
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
 
+      // 把模板编译成 render function 字符串和  staticRenderFns 字符串
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
@@ -77,6 +80,7 @@ Vue.prototype.$mount = function (
       options.staticRenderFns = staticRenderFns
 
       /* istanbul ignore if */
+      // 服务端渲染相关，先跳过
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile end')
         measure(`vue ${this._name} compile`, 'compile', 'compile end')

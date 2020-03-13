@@ -20,7 +20,7 @@ function Vue (options) { // 真正的 Vue 函数
 initMixin(Vue)
 stateMixin(Vue)
 eventsMixin(Vue)
-lifecycleMixin(Vue)
+lifecycleMixin(Vue) // 混合生命周期
 renderMixin(Vue)
 
 export default Vue

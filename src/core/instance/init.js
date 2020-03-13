@@ -12,7 +12,7 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 
 let uid = 0
 
-export function initMixin (Vue: Class<Component>) {
+export function initMixin (Vue: Class<Component>) { // 初始化生命周期、事件、各种 State 后就 $mount 挂载
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this // this 指向实例的，把 this 赋给 vm， vm 就代表 Vue 实例。
     // a uid
@@ -49,10 +49,10 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
-    initLifecycle(vm)
-    initEvents(vm)
+    initLifecycle(vm) // 初始化生命周期
+    initEvents(vm) // 初始化事件
     initRender(vm)
-    callHook(vm, 'beforeCreate')
+    callHook(vm, 'beforeCreate') 
     initInjections(vm) // resolve injections before data/props
     initState(vm) // 处理 options 的 props, methods, data, computed, watch
     initProvide(vm) // resolve provide after data/props
@@ -66,7 +66,8 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     if (vm.$options.el) {
-      vm.$mount(vm.$options.el)
+      // mount 方法定义在 platform 下的对应入口平台处。
+      vm.$mount(vm.$options.el) // 挂载
     }
   }
 }

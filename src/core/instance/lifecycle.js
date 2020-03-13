@@ -138,13 +138,15 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// vm.prototype.$mount 的本体所在啦
 export function mountComponent (
   vm: Component,
   el: ?Element,
   hydrating?: boolean
 ): Component {
   vm.$el = el
-  if (!vm.$options.render) {
+  // 若是 runtime + compiler 版本，此时 template 已经被编译成 render 并给 vm.$options.render 了
+  if (!vm.$options.render) { // 若是 runtime-only 但没加 render 函数的话就会走下面的 if 报错提醒。
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
       /* istanbul ignore if */
@@ -194,7 +196,8 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
-  new Watcher(vm, updateComponent, noop, {
+  // updateComponent 是初始化时做的， 第三个参数 noop 是检测当 vm 实例中的数据发生变化时执行的回调函数
+  new Watcher(vm, updateComponent, noop, { 
     before () {
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')
@@ -205,7 +208,7 @@ export function mountComponent (
 
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
-  if (vm.$vnode == null) {
+  if (vm.$vnode == null) { // 此处的 vm.$vnode 表示的是 Vue 实例的父虚拟节点，若为 Vue 根实例时，其父虚拟节点为 null
     vm._isMounted = true
     callHook(vm, 'mounted')
   }

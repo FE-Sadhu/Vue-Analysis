@@ -164,7 +164,7 @@ export function getData (data: Function, vm: Component): any {
     // 原来 data () { return { xx }} 这种调用方式是可以接受 vue 实例参数的，并且 this 绑定 实例。
     // 为什么有个 call 把 this 指向 vm 呢？ 因为 data 里面是访问 this 的，比如用 this 取 props 的值。
     // 那么这个 this.propKey 就等同于 vm.propKey
-    return data.call(vm, vm) 
+    return data.call(vm, vm)
   } catch (e) {
     handleError(e, vm, `data()`)
     return {}
