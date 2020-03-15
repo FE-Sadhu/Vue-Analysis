@@ -53,6 +53,7 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   const hasHandler = {
+    // 拦截 hasProperty，最常见行为就是 in 操作符。
     has (target, key) {
       const has = key in target
       const isAllowed = allowedGlobals(key) ||
@@ -66,6 +67,7 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   const getHandler = {
+    // 拦截读
     get (target, key) {
       if (typeof key === 'string' && !(key in target)) { // in 操作符可以读 getter !!!!!!!!!!!!!!!!!!!! 
         if (key in target.$data) warnReservedPrefix(target, key) // 报警告⚠️：key 多半是 _ || $ 开头的，没被 vue 实例代理。(也就是没被加上 getter setter)
@@ -79,9 +81,10 @@ if (process.env.NODE_ENV !== 'production') {
     if (hasProxy) { // 支持 Proxy api 不。
       // determine which proxy handler to use
       const options = vm.$options
-      const handlers = options.render && options.render._withStripped
-        ? getHandler // runtime-only 版本就是 getHandler ，因为需要手写 render
+      const handlers = options.render && options.render._withStripped // options.render._withStripped这个属性只在测试代码中出现过，所以一般情况下这个条件都会为假，也就是使用 hasHandler 作为代理配置
+        ? getHandler // 不一定 _withStripped 存疑 -> runtime-only 版本就是 getHandler ，因为需要手写 render 
         : hasHandler // 带编译器的版本就是 hasHandler，因为此时还没编译 template 没有 render 函数
+        // runtime-only 极有可能的 handler 也是 hasHandler
       vm._renderProxy = new Proxy(vm, handlers)
     } else {
       vm._renderProxy = vm
