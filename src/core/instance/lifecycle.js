@@ -59,12 +59,12 @@ export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
-    const prevVnode = vm._vnode
+    const prevVnode = vm._vnode // 首次渲染时为 null 
     const restoreActiveInstance = setActiveInstance(vm)
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
-    if (!prevVnode) {
+    if (!prevVnode) { // 首次渲染走的逻辑
       // initial render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
@@ -144,7 +144,7 @@ export function mountComponent (
   el: ?Element,
   hydrating?: boolean
 ): Component {
-  vm.$el = el
+  vm.$el = el // 挂载点给 vm.$el 了
   // 若是 runtime + compiler 版本，此时 template 已经被编译成 render 并给 vm.$options.render 了
   if (!vm.$options.render) { // 若是 runtime-only 但没加 render 函数的话就会走下面的 if 报错提醒。
     vm.$options.render = createEmptyVNode
@@ -197,7 +197,7 @@ export function mountComponent (
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
   // updateComponent 是初始化时做的， 第三个参数 noop 是检测当 vm 实例中的数据发生变化时执行的回调函数
-  new Watcher(vm, updateComponent, noop, { 
+  new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')

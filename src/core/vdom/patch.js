@@ -69,7 +69,7 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
 
 export function createPatchFunction (backend) {
   let i, j
-  const cbs = {}
+  const cbs = {} // 各个 hooks 的回调集合
 
   const { modules, nodeOps } = backend
 
@@ -141,6 +141,7 @@ export function createPatchFunction (backend) {
     }
 
     vnode.isRootInsert = !nested // for transition enter check
+    // createComponent 是尝试创建子组件
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
       return
     }
@@ -153,6 +154,7 @@ export function createPatchFunction (backend) {
         if (data && data.pre) {
           creatingElmInVPre++
         }
+        // 判断 tag 是否合法
         if (isUnknownElement(vnode, creatingElmInVPre)) {
           warn(
             'Unknown custom element: <' + tag + '> - did you ' +
@@ -163,9 +165,9 @@ export function createPatchFunction (backend) {
         }
       }
 
-      vnode.elm = vnode.ns
+      vnode.elm = vnode.ns // 首次渲染 vnode.ns 为 undefined
         ? nodeOps.createElementNS(vnode.ns, tag)
-        : nodeOps.createElement(tag, vnode)
+        : nodeOps.createElement(tag, vnode) // 创建一个标签为 tag 的空元素
       setScope(vnode)
 
       /* istanbul ignore if */
@@ -698,20 +700,21 @@ export function createPatchFunction (backend) {
   }
 
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
+    // 首次渲染的时候， oldVnode 是 vm.$el，vnode 就是 _render() 生成的 vnode
     if (isUndef(vnode)) {
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
       return
     }
 
     let isInitialPatch = false
-    const insertedVnodeQueue = []
+    const insertedVnodeQueue = [] // 插入的 vnode 队列
 
     if (isUndef(oldVnode)) {
       // empty mount (likely as component), create new root element
       isInitialPatch = true
       createElm(vnode, insertedVnodeQueue)
     } else {
-      const isRealElement = isDef(oldVnode.nodeType)
+      const isRealElement = isDef(oldVnode.nodeType) // 首次渲染的时候是真实节点
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
@@ -740,14 +743,15 @@ export function createPatchFunction (backend) {
           }
           // either not server-rendered, or hydration failed.
           // create an empty node and replace it
-          oldVnode = emptyNodeAt(oldVnode)
+          oldVnode = emptyNodeAt(oldVnode) // 创建一个空虚拟节点
         }
 
         // replacing existing element
-        const oldElm = oldVnode.elm
-        const parentElm = nodeOps.parentNode(oldElm)
+        const oldElm = oldVnode.elm // 上面空虚拟节点的 elm 属性对应其原本的真实 DOM 节点
+        const parentElm = nodeOps.parentNode(oldElm) // 首次渲染时，对于我们例子来说，挂载点的父节点就是 body 标签的 DOM 节点
 
         // create new node
+        // createElm 的作用是通过虚拟节点创建真实的 DOM 并插入到它的父节点中
         createElm(
           vnode,
           insertedVnodeQueue,
