@@ -109,11 +109,13 @@ export function createComponent (
     return
   }
 
-  const baseCtor = context.$options._base
+  const baseCtor = context.$options._base // Vue 构造函数，init() 初始化那里就有 merge 过 options。
 
   // plain options object: turn it into a constructor
   if (isObject(Ctor)) {
-    Ctor = baseCtor.extend(Ctor)
+    // 根据 baseCtor(Vue) 构造函数和 Ctor 组件对象创建一个新的构造函数，这个构造函数的方法都和 Vue 的一样，但是其 options 静态属性的 value 对象包含传进去的组件对象 Ctor 的属性
+    // 内部其实就是个原型继承，新构造函数的原型就指向 baseCtor 的原型
+    Ctor = baseCtor.extend(Ctor) 
   }
 
   // if at this stage it's not a constructor or an async component factory,
@@ -126,6 +128,7 @@ export function createComponent (
   }
 
   // async component
+  // 对异步组件的处理
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
@@ -151,6 +154,7 @@ export function createComponent (
   resolveConstructorOptions(Ctor)
 
   // transform component v-model data into props & events
+  // 对 v-model 的判断
   if (isDef(data.model)) {
     transformModel(Ctor.options, data)
   }
@@ -183,9 +187,11 @@ export function createComponent (
   }
 
   // install component management hooks onto the placeholder node
+  // 安装组件钩子函数
   installComponentHooks(data)
 
   // return a placeholder vnode
+  // 实例化 Vnode
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
@@ -230,7 +236,7 @@ function installComponentHooks (data: VNodeData) {
     const existing = hooks[key]
     const toMerge = componentVNodeHooks[key]
     if (existing !== toMerge && !(existing && existing._merged)) {
-      hooks[key] = existing ? mergeHook(toMerge, existing) : toMerge
+      hooks[key] = existing ? mergeHook(toMerge, existing) : toMerge // 按合并策略合并的,这策略很简单，假如 data.hook 中已经存在了某个钩子函数时，那就 mergeHook 一下。
     }
   }
 }

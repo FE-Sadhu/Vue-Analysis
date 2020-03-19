@@ -18,14 +18,17 @@ export function initExtend (Vue: GlobalAPI) {
    */
   Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
-    const Super = this
+    const Super = this // 指向 Vue 构造函数
     const SuperId = Super.cid
-    const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
+    // 一个缓存的优化机制： 如果是同一个组件对象，比如传进来的 extendOptions 相同的话，那如果之前有根据这个组件对象生成过一个构造函数了，那么直接返回缓存里的构造函数。
+    // 这样组件复用的时候，不用每次都对同一个组件创建新的构造函数。
+    // 第 80 行代码就是缓存起来。
+    const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {}) 
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
     }
 
-    const name = extendOptions.name || Super.options.name
+    const name = extendOptions.name || Super.options.name // 组件的 name 
     if (process.env.NODE_ENV !== 'production' && name) {
       validateComponentName(name)
     }
@@ -33,19 +36,19 @@ export function initExtend (Vue: GlobalAPI) {
     const Sub = function VueComponent (options) {
       this._init(options)
     }
-    Sub.prototype = Object.create(Super.prototype)
-    Sub.prototype.constructor = Sub
+    Sub.prototype = Object.create(Super.prototype) // 创建 Sub.prototype 原型对象，它的原型指向 Vue.prototype
+    Sub.prototype.constructor = Sub // 修改 constructor 指针
     Sub.cid = cid++
     Sub.options = mergeOptions(
-      Super.options,
-      extendOptions
+      Super.options, // Vue.options
+      extendOptions // 传进来的组件对象
     )
     Sub['super'] = Super
 
     // For props and computed properties, we define the proxy getters on
     // the Vue instances at extension time, on the extended prototype. This
     // avoids Object.defineProperty calls for each instance created.
-    if (Sub.options.props) {
+    if (Sub.options.props) { // 对组件对象中的 props 和下面的 computed 做了初始化工作
       initProps(Sub)
     }
     if (Sub.options.computed) {
@@ -75,7 +78,7 @@ export function initExtend (Vue: GlobalAPI) {
     Sub.sealedOptions = extend({}, Sub.options)
 
     // cache constructor
-    cachedCtors[SuperId] = Sub
+    cachedCtors[SuperId] = Sub // 缓存机制
     return Sub
   }
 }

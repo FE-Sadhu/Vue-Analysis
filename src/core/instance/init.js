@@ -36,7 +36,7 @@ export function initMixin (Vue: Class<Component>) { // 初始化生命周期、�
       initInternalComponent(vm, options)
     } else {
       vm.$options = mergeOptions( // merge 传入的 options，挂载在 vm.$options 上
-        resolveConstructorOptions(vm.constructor),
+        resolveConstructorOptions(vm.constructor), // 把前面初始化的全局 API 也就是 Vue 静态属性的 options 与当前 options, vm 作合并，合并后赋给 vm.$options
         options || {},
         vm
       )
