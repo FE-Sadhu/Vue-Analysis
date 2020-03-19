@@ -1,16 +1,15 @@
 /* eslint-disable no-new */
 import Vue from 'vue'
+import Home from './views/Home.vue' // 测试 render(组件对象)时用例
 // import App from './App.vue'
 // import router from './router'
 // import store from './store'
 
 Vue.config.productionTip = false
 
-// new Vue({
-//   router,
-//   store,
-//   render: h => h(App)
-// }).$mount('#app')
+new Vue({
+  render: h => h(Home)
+}).$mount('#app')
 
 /* eslint-disable no-new */
 // 测试一：template 编译后生成的 render 函数，其生成的 vnode 转换成真实 DOM 后会替代 el 下的 html。 el 仅仅只是标志一个挂载点。
@@ -72,18 +71,18 @@ Vue.config.productionTip = false
 /*
 测试三： patch 首次渲染的流程，打断点查看。
 */
-new Vue({
-  el: '#app',
-  data() {
-    return {
-      msg: 'Hello Vue'
-    }
-  },
-  render(createElement) {
-    return createElement('div', {
-      attrs: {
-        id: 'sadhu'
-      }
-    }, this.msg)
-  }
-})
+// new Vue({
+//   el: '#app',
+//   data() {
+//     return {
+//       msg: 'Hello Vue'
+//     }
+//   },
+//   render(createElement) {
+//     return createElement('div', {
+//       attrs: {
+//         id: 'sadhu'
+//       }
+//     }, this.msg)
+//   }
+// })
