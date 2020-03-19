@@ -122,6 +122,7 @@ export function createPatchFunction (backend) {
 
   let creatingElmInVPre = 0
 
+  // createElm 就是通过虚拟节点创建真实 DOM 并插入到其父节点。
   function createElm (
     vnode,
     insertedVnodeQueue,
@@ -190,11 +191,11 @@ export function createPatchFunction (backend) {
           insert(parentElm, vnode.elm, refElm)
         }
       } else {
-        createChildren(vnode, children, insertedVnodeQueue)
+        createChildren(vnode, children, insertedVnodeQueue) // 递归把该 vnode 的作为根节点添加好它的子节点形成 vnode tree 后
         if (isDef(data)) {
-          invokeCreateHooks(vnode, insertedVnodeQueue)
+          invokeCreateHooks(vnode, insertedVnodeQueue) // 执行所有 create 钩子并把 vnode push 到 insertedVnodeQueue 中
         }
-        insert(parentElm, vnode.elm, refElm)
+        insert(parentElm, vnode.elm, refElm) // 把 DOM 节点插入到父节点。
       }
 
       if (process.env.NODE_ENV !== 'production' && data && data.pre) {
@@ -288,10 +289,12 @@ export function createPatchFunction (backend) {
       if (process.env.NODE_ENV !== 'production') {
         checkDuplicateKeys(children)
       }
-      for (let i = 0; i < children.length; ++i) {
+      for (let i = 0; i < children.length; ++i) { // 遍历子虚拟节点
+        // 根据虚拟节点创建真实节点插入父节点中。
         createElm(children[i], insertedVnodeQueue, vnode.elm, null, true, children, i)
       }
     } else if (isPrimitive(vnode.text)) {
+      // 如果是文本虚拟节点直接创建文本节点插入父节点中。
       nodeOps.appendChild(vnode.elm, nodeOps.createTextNode(String(vnode.text)))
     }
   }
@@ -743,7 +746,7 @@ export function createPatchFunction (backend) {
           }
           // either not server-rendered, or hydration failed.
           // create an empty node and replace it
-          oldVnode = emptyNodeAt(oldVnode) // 创建一个空虚拟节点
+          oldVnode = emptyNodeAt(oldVnode) // 根据挂载点创建一个空虚拟节点
         }
 
         // replacing existing element
@@ -763,6 +766,7 @@ export function createPatchFunction (backend) {
         )
 
         // update parent placeholder node element, recursively
+        // 这是组件时候，暂不考虑
         if (isDef(vnode.parent)) {
           let ancestor = vnode.parent
           const patchable = isPatchable(vnode)
@@ -794,7 +798,7 @@ export function createPatchFunction (backend) {
 
         // destroy old node
         if (isDef(parentElm)) {
-          removeVnodes([oldVnode], 0, 0)
+          removeVnodes([oldVnode], 0, 0) // 在递归创建完真实 DOM 树并插入到挂载点的父节点后，就删除掉挂载点 DOM 。
         } else if (isDef(oldVnode.tag)) {
           invokeDestroyHook(oldVnode)
         }
