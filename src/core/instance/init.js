@@ -29,11 +29,12 @@ export function initMixin (Vue: Class<Component>) { // 初始化生命周期、�
     // a flag to avoid this being observed
     vm._isVue = true
     // merge options
-    if (options && options._isComponent) {
+    if (options && options._isComponent) { // 组件的话
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
-      initInternalComponent(vm, options)
+      // 把组件 vnode 对应的构造函数 Ctor 的静态属性 options 上的所有属性、组件的 vnode 、activeInstance、vnode.componentOptions 上的属性 merge 到 vm.$options 上。
+      initInternalComponent(vm, options) 
     } else {
       vm.$options = mergeOptions( // merge 传入的 options，挂载在 vm.$options 上
         resolveConstructorOptions(vm.constructor), // 把前面初始化的全局 API 也就是 Vue 静态属性的 options 与当前 options, vm 作合并，合并后赋给 vm.$options
@@ -66,6 +67,7 @@ export function initMixin (Vue: Class<Component>) { // 初始化生命周期、�
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
+    // 组件初始化时是不会传 el 的。
     if (vm.$options.el) {
       // mount 方法定义在 platform 下的对应入口平台处。
       vm.$mount(vm.$options.el) // 挂载
@@ -74,10 +76,11 @@ export function initMixin (Vue: Class<Component>) { // 初始化生命周期、�
 }
 
 export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
-  const opts = vm.$options = Object.create(vm.constructor.options)
+  // 这个 vm 是组件 vnode 的构造函数 Ctor 的实例。
+  const opts = vm.$options = Object.create(vm.constructor.options) // Ctor.options (包含组件对象的属性，Vue 的全局 api)
   // doing this because it's faster than dynamic enumeration.
-  const parentVnode = options._parentVnode
-  opts.parent = options.parent
+  const parentVnode = options._parentVnode // 组件 vnode
+  opts.parent = options.parent // activeInstance
   opts._parentVnode = parentVnode
 
   const vnodeComponentOptions = parentVnode.componentOptions

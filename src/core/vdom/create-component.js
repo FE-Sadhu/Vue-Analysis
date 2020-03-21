@@ -44,10 +44,12 @@ const componentVNodeHooks = {
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      // 创建一个组件实例 =》 new （组件 vnode 对应的） Ctor(options)
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
       )
+      // 手动挂载子组件
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
@@ -226,6 +228,7 @@ export function createComponentInstanceForVnode (
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
+  // 执行该组件 vnode 对应的构造函数 Ctor()
   return new vnode.componentOptions.Ctor(options)
 }
 

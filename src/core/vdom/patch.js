@@ -142,7 +142,8 @@ export function createPatchFunction (backend) {
     }
 
     vnode.isRootInsert = !nested // for transition enter check
-    // createComponent 是尝试创建子组件
+    // createComponent 是组件 vnode 走的逻辑
+    // 若是组件 vnode ，那直接执行完 createComponent 后就结束 createElm() 函数
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
       return
     }
@@ -215,7 +216,9 @@ export function createPatchFunction (backend) {
     if (isDef(i)) {
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
       if (isDef(i = i.hook) && isDef(i = i.init)) {
-        i(vnode, false /* hydrating */)
+        // data.hook.init() // 这方法是创建组件 vnode 时插入的组件钩子函数 init()
+        // 这个方法的作用就是初始化子组件、创建子组件的 vnode 并把子组件挂载到页面上
+        i(vnode, false /* hydrating */) 
       }
       // after calling the init hook, if the vnode is a child component
       // it should've created a child instance and mounted it. the child
@@ -712,7 +715,7 @@ export function createPatchFunction (backend) {
     let isInitialPatch = false
     const insertedVnodeQueue = [] // 插入的 vnode 队列
 
-    if (isUndef(oldVnode)) {
+    if (isUndef(oldVnode)) { // 组件不会有 el 属性，所以这里为空
       // empty mount (likely as component), create new root element
       isInitialPatch = true
       createElm(vnode, insertedVnodeQueue)

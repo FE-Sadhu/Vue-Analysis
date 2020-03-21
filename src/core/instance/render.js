@@ -76,7 +76,7 @@ export function renderMixin (Vue: Class<Component>) {
     // 拿到 render 函数。
     const { render, _parentVnode } = vm.$options
 
-    if (_parentVnode) {
+    if (_parentVnode) { // _parentVnode 就是当前组件对象的 vnode
       vm.$scopedSlots = normalizeScopedSlots(
         _parentVnode.data.scopedSlots,
         vm.$slots,
@@ -86,9 +86,11 @@ export function renderMixin (Vue: Class<Component>) {
 
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
+    // _parentVnode 就是当前组件对象的 vnode。 vm 是当前组件对象的 Ctor 的实例
+    // vm 可以说是子组件，那么 _parentVnode 就是子组件的父(组件的) vnode
     vm.$vnode = _parentVnode
     // render self
-    let vnode
+    let vnode // 当前组件的 vnode
     try {
       // There's no need to maintain a stack because all render fns are called
       // separately from one another. Nested component's render fns are called
@@ -132,7 +134,7 @@ export function renderMixin (Vue: Class<Component>) {
       vnode = createEmptyVNode()
     }
     // set parent
-    vnode.parent = _parentVnode
+    vnode.parent = _parentVnode // 当前组件的 vnode.parent 指向父组件 vnode
     return vnode
   }
 }
